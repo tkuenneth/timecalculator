@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.thomaskuenneth.zeitrechner.MainActivity">
+
+  <TextView
+      android:id="@+id/inputTextView"
+      style="@android:style/TextAppearance.Medium"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentTop="true"
+      android:layout_marginBottom="16dp"
+      android:hint="@string/input_hint"
+      android:lines="1"
+      android:typeface="monospace" />
+
+  <TableLayout
+      android:id="@+id/tableLayout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:stretchColumns="*">
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/b7"
+          android:onClick="handleButtonClick"
+          android:text="@string/seven" />
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/b8"
+          android:onClick="handleButtonClick"
+          android:text="@string/eight" />
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/b9"
+          android:onClick="handleButtonClick"
+          android:text="@string/nine" />
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/bCorrection"
+          android:onClick="handleButtonClick"
+          android:text="@string/clear" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/b4"
+          android:onClick="handleButtonClick"
+          android:text="@string/four" />
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/b5"
+          android:onClick="handleButtonClick"
+          android:text="@string/five" />
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/b6"
+          android:onClick="handleButtonClick"
+          android:text="@string/six" />
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/bMinus"
+          android:onClick="handleButtonClick"
+          android:text="@string/minus" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/b1"
+          android:onClick="handleButtonClick"
+          android:text="@string/one" />
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/b2"
+          android:onClick="handleButtonClick"
+          android:text="@string/two" />
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/b3"
+          android:onClick="handleButtonClick"
+          android:text="@string/three" />
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/bPlus"
+          android:onClick="handleButtonClick"
+          android:text="@string/plus" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/b0"
+          android:layout_span="2"
+          android:onClick="handleButtonClick"
+          android:text="@string/zero" />
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/bColon"
+          android:onClick="handleButtonClick"
+          android:text="@string/colon" />
+
+      <Button
+          style="?android:attr/buttonBarButtonStyle"
+          android:id="@+id/bResult"
+          android:onClick="handleButtonClick"
+          android:text="@string/equal" />
+
+    </TableRow>
+
+  </TableLayout>
+
+  <ScrollView
+      android:id="@+id/scrollView"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_below="@id/inputTextView"
+      android:layout_above="@id/tableLayout">
+
+    <TextView
+        android:id="@+id/outputTextView"
+        style="@android:style/TextAppearance.Medium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace" />
+  </ScrollView>
+
+</RelativeLayout>
