@@ -128,9 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateOutputTextView() {
         outputTextView.setText(sb.toString());
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            scrollView.fullScroll(ScrollView.FOCUS_DOWN);
-        }, 500);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> scrollView.fullScroll(ScrollView.FOCUS_DOWN), 500);
     }
 
     private void resetOutputTextView() {
