@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016  Thomas Kuenneth
+ * Copyright (C) 2016 - 2021  Thomas Kuenneth
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,17 @@
  */
 package com.thomaskuenneth.zeitrechner;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,17 +62,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 case "+":
-                    handleInput(txt);
-                    break;
                 case "-":
-                    handleInput(txt);
-                    break;
-                case ":":
-                    inputTextView.append(txt);
-                    break;
                 case "=":
                     handleInput(txt);
                     break;
+                case ":":
                 default:
                     inputTextView.append(txt);
                     break;
@@ -129,7 +128,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateOutputTextView() {
         outputTextView.setText(sb.toString());
-        scrollView.fullScroll(ScrollView.FOCUS_DOWN);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            scrollView.fullScroll(ScrollView.FOCUS_DOWN);
+        }, 500);
     }
 
     private void resetOutputTextView() {
@@ -140,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String getTimeAsString(int hours, int minutes) {
-        return String.format("%3d:%02d", hours, minutes);
+        return String.format(Locale.US, "%3d:%02d", hours, minutes);
     }
 
     private int getIntFromString(String s) {
