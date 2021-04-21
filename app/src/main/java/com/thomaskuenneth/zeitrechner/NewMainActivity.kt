@@ -6,10 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -49,19 +46,23 @@ fun Content() {
             state.animateScrollTo(state.maxValue)
         }
     }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
         Zeile1(input.value)
-        Zeile2(
-            output.value, modifier =
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = output.value,
+            modifier =
             Modifier
+                .fillMaxWidth()
                 .weight(1.0f)
-                .verticalScroll(state = state)
+                .verticalScroll(state = state),
+            style = MaterialTheme.typography.body1
         )
+        Spacer(modifier = Modifier.height(16.dp))
         MyRow(listOf("7", "8", "9", "CE"), listOf(0.25f, 0.25f, 0.25f, 0.25f), callback)
         MyRow(listOf("4", "5", "6", "-"), listOf(0.25f, 0.25f, 0.25f, 0.25f), callback)
         MyRow(listOf("1", "2", "3", "+"), listOf(0.25f, 0.25f, 0.25f, 0.25f), callback)
@@ -71,20 +72,20 @@ fun Content() {
 
 @Composable
 fun Zeile1(t: String) {
-    Text(t)
-}
-
-@Composable
-fun Zeile2(t: String, modifier: Modifier) {
+    val showHint = t.isEmpty()
     Text(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp), text = t
+        text = if (showHint) stringResource(id = R.string.input_hint) else t,
+        color = if (showHint) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface,
+        style = MaterialTheme.typography.body1
     )
 }
 
 @Composable
-fun MyRow(texts: List<String>, weights: List<Float>, callback: (text: String) -> Any) {
+fun MyRow(
+    texts: List<String>,
+    weights: List<Float>,
+    callback: (text: String) -> Any
+) {
     Row(modifier = Modifier.fillMaxWidth()) {
         for (i in texts.indices) {
             MyButton(
@@ -97,7 +98,11 @@ fun MyRow(texts: List<String>, weights: List<Float>, callback: (text: String) ->
 }
 
 @Composable
-fun MyButton(text: String, callback: (text: String) -> Any, modifier: Modifier = Modifier) {
+fun MyButton(
+    text: String,
+    callback: (text: String) -> Any,
+    modifier: Modifier = Modifier
+) {
     Button(
         modifier = modifier
             .padding(4.dp),
