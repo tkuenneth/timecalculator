@@ -148,8 +148,8 @@
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_below="@id/inputTextView"
-        android:layout_above="@id/tableLayout">
+        android:layout_above="@id/tableLayout"
+        android:layout_below="@id/inputTextView">
 
         <TextView
             android:id="@+id/outputTextView"
