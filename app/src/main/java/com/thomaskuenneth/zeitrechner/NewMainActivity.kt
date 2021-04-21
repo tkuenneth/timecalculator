@@ -10,13 +10,11 @@ import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import java.util.*
 
 class NewMainActivity : ComponentActivity() {
@@ -39,15 +37,19 @@ class NewMainActivity : ComponentActivity() {
 
 @Composable
 fun Content() {
-    val sb = remember { StringBuilder() }
     val input = remember { mutableStateOf("") }
     val output = remember { mutableStateOf("") }
     val result = remember { mutableStateOf(0) }
     val lastOp = remember { mutableStateOf("") }
-    val callback = { text: String ->
-        handleButtonClick(text, sb, input, output, lastOp, result)
-    }
     val state = rememberScrollState()
+    val scope = rememberCoroutineScope()
+    val callback = { text: String ->
+        handleButtonClick(text, input, output, lastOp, result)
+        scope.launch {
+            state.animateScrollTo(state.maxValue)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -82,7 +84,7 @@ fun Zeile2(t: String, modifier: Modifier) {
 }
 
 @Composable
-fun MyRow(texts: List<String>, weights: List<Float>, callback: (text: String) -> Unit) {
+fun MyRow(texts: List<String>, weights: List<Float>, callback: (text: String) -> Any) {
     Row(modifier = Modifier.fillMaxWidth()) {
         for (i in texts.indices) {
             MyButton(
@@ -95,7 +97,7 @@ fun MyRow(texts: List<String>, weights: List<Float>, callback: (text: String) ->
 }
 
 @Composable
-fun MyButton(text: String, callback: (text: String) -> Unit, modifier: Modifier = Modifier) {
+fun MyButton(text: String, callback: (text: String) -> Any, modifier: Modifier = Modifier) {
     Button(
         modifier = modifier
             .padding(4.dp),
@@ -109,7 +111,6 @@ fun MyButton(text: String, callback: (text: String) -> Unit, modifier: Modifier 
 
 fun handleButtonClick(
     txt: String,
-    sb: StringBuilder,
     inputTextView: MutableState<String>,
     outputTextView: MutableState<String>,
     lastOp: MutableState<String>,
@@ -121,18 +122,17 @@ fun handleButtonClick(
         } else {
             result.value = 0
             lastOp.value = "+"
-            sb.setLength(0)
+            outputTextView.value = ""
         }
-        "+", "-", "=" -> handleInput(sb, inputTextView, txt, lastOp, result)
+        "+", "-", "=" -> handleInput(inputTextView, outputTextView, txt, lastOp, result)
         ":" -> inputTextView.value += txt
         else -> inputTextView.value += txt
     }
-    outputTextView.value = sb.toString()
 }
 
 private fun handleInput(
-    sb: StringBuilder,
     inputTextView: MutableState<String>,
+    outputTextView: MutableState<String>,
     op: String,
     lastOp: MutableState<String>,
     result: MutableState<Int>
@@ -161,21 +161,16 @@ private fun handleInput(
     }
     lastOp.value = op
     result.value += total
-    if (sb.isNotEmpty()) {
-        sb.append("\n")
+    if (outputTextView.value.isNotEmpty()) {
+        outputTextView.value += "\n"
     }
-    sb.append(getTimeAsString(hours, minutes))
-        .append(" ")
-        .append(op)
+    outputTextView.value += "${getTimeAsString(hours, minutes)} $op"
     if ("=" == op) {
         val temp: Int = if (result.value < 0) -result.value else result.value
         hours = temp / 60
         minutes = temp % 60
         val strResult = getTimeAsString(hours, minutes).trim { it <= ' ' }
-        sb.append(" ")
-            .append(if (result.value < 0) "-" else "")
-            .append(strResult)
-            .append("\n")
+        outputTextView.value += " ${if (result.value < 0) "-" else ""}${strResult}\n"
         result.value = 0
         inputTextView.value = strResult
     } else {
