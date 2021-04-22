@@ -10,6 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.util.*
@@ -32,6 +33,7 @@ class NewMainActivity : ComponentActivity() {
     }
 }
 
+@Preview
 @Composable
 fun Content() {
     val input = remember { mutableStateOf("") }
@@ -74,8 +76,14 @@ fun Content() {
 fun Zeile1(t: String) {
     val showHint = t.isEmpty()
     Text(
-        text = if (showHint) stringResource(id = R.string.input_hint) else t,
-        color = if (showHint) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface,
+        text = if (showHint)
+            stringResource(id = R.string.input_hint)
+        else
+            t,
+        color = if (showHint)
+            MaterialTheme.colors.secondary
+        else
+            MaterialTheme.colors.onSurface,
         style = MaterialTheme.typography.body1
     )
 }
