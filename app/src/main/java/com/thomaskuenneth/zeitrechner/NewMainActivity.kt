@@ -65,10 +65,26 @@ fun Content() {
             style = MaterialTheme.typography.body1
         )
         Spacer(modifier = Modifier.height(16.dp))
-        MyRow(listOf("7", "8", "9", "CE"), listOf(0.25f, 0.25f, 0.25f, 0.25f), callback)
-        MyRow(listOf("4", "5", "6", "-"), listOf(0.25f, 0.25f, 0.25f, 0.25f), callback)
-        MyRow(listOf("1", "2", "3", "+"), listOf(0.25f, 0.25f, 0.25f, 0.25f), callback)
-        MyRow(listOf("0", ":", "="), listOf(0.5f, 0.25f, 0.25f), callback)
+        MyRow(
+            listOf("7", "8", "9", "CE"),
+            listOf(0.25f, 0.25f, 0.25f, 0.25f),
+            callback
+        )
+        MyRow(
+            listOf("4", "5", "6", "-"),
+            listOf(0.25f, 0.25f, 0.25f, 0.25f),
+            callback
+        )
+        MyRow(
+            listOf("1", "2", "3", "+"),
+            listOf(0.25f, 0.25f, 0.25f, 0.25f),
+            callback
+        )
+        MyRow(
+            listOf("0", ":", "="),
+            listOf(0.5f, 0.25f, 0.25f),
+            callback
+        )
     }
 }
 
