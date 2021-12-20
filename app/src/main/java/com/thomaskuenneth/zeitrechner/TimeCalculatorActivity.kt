@@ -192,7 +192,7 @@ private fun handleInput(
         } else {
             var total = 0
             if (line.isNotEmpty()) {
-                total = line.toInt()
+                total = getIntFromString(line)
             }
             val hours = total / 60
             val minutes = total % 60
