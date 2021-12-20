@@ -23,21 +23,23 @@ class TimeCalculatorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Scaffold(
-                topBar = {
-                    SmallTopAppBar(title = {
-                        Text(stringResource(id = R.string.app_name))
-                    })
-                }
-            ) {
-                MaterialTheme(
-                    content = { Content() },
-                    colorScheme = if (isSystemInDarkTheme())
-                        darkColorScheme()
-                    else
-                        lightColorScheme()
-                )
-            }
+            MaterialTheme(
+                content = {
+                    Scaffold(
+                        topBar = {
+                            SmallTopAppBar(title = {
+                                Text(stringResource(id = R.string.app_name))
+                            })
+                        }
+                    ) {
+                        Content()
+                    }
+                },
+                colorScheme = if (isSystemInDarkTheme())
+                    darkColorScheme()
+                else
+                    lightColorScheme()
+            )
         }
     }
 }
