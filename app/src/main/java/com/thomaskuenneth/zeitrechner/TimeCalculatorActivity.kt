@@ -3,10 +3,11 @@ package com.thomaskuenneth.zeitrechner
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -15,14 +16,15 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import java.util.*
 
-class NewMainActivity : ComponentActivity() {
+@ExperimentalMaterial3Api
+class TimeCalculatorActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             Scaffold(
                 topBar = {
-                    TopAppBar(title = {
+                    SmallTopAppBar(title = {
                         Text(stringResource(id = R.string.app_name))
                     })
                 }
@@ -51,45 +53,60 @@ fun Content() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .background(color = MaterialTheme.colorScheme.surface)
     ) {
-        Zeile1(input.value)
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .weight(1.0F)
+        ) {
+            TimeInput(input.value)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = output.value,
+                color = MaterialTheme.colorScheme.primary,
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1.0f)
+                    .verticalScroll(state = state),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = output.value,
-            modifier =
-            Modifier
-                .fillMaxWidth()
-                .weight(1.0f)
-                .verticalScroll(state = state),
-            style = MaterialTheme.typography.body1
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        MyRow(
-            listOf("7", "8", "9", "CE"),
-            listOf(0.25f, 0.25f, 0.25f, 0.25f),
-            callback
-        )
-        MyRow(
-            listOf("4", "5", "6", "-"),
-            listOf(0.25f, 0.25f, 0.25f, 0.25f),
-            callback
-        )
-        MyRow(
-            listOf("1", "2", "3", "+"),
-            listOf(0.25f, 0.25f, 0.25f, 0.25f),
-            callback
-        )
-        MyRow(
-            listOf("0", ":", "="),
-            listOf(0.5f, 0.25f, 0.25f),
-            callback
-        )
+        Column(
+            modifier = Modifier
+                .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                .padding(16.dp)
+
+        ) {
+            NumKeypadRow(
+                listOf("7", "8", "9", "CE"),
+                listOf(0.25f, 0.25f, 0.25f, 0.25f),
+                callback
+            )
+            NumKeypadRow(
+                listOf("4", "5", "6", "-"),
+                listOf(0.25f, 0.25f, 0.25f, 0.25f),
+                callback
+            )
+            NumKeypadRow(
+                listOf("1", "2", "3", "+"),
+                listOf(0.25f, 0.25f, 0.25f, 0.25f),
+                callback
+            )
+            NumKeypadRow(
+                listOf("0", ":", "="),
+                listOf(0.5f, 0.25f, 0.25f),
+                callback
+            )
+
+        }
     }
 }
 
 @Composable
-fun Zeile1(t: String) {
+fun TimeInput(t: String) {
     val showHint = t.isEmpty()
     Text(
         text = if (showHint)
@@ -97,20 +114,22 @@ fun Zeile1(t: String) {
         else
             t,
         color = if (showHint)
-            MaterialTheme.colors.secondary
+            MaterialTheme.colorScheme.onSurface
         else
-            MaterialTheme.colors.onSurface,
-        style = MaterialTheme.typography.body1
+            MaterialTheme.colorScheme.secondary,
+        style = MaterialTheme.typography.bodyLarge
     )
 }
 
 @Composable
-fun MyRow(
+fun NumKeypadRow(
     texts: List<String>,
     weights: List<Float>,
     callback: (text: String) -> Any
 ) {
-    Row(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+    ) {
         for (i in texts.indices) {
             MyButton(
                 text = texts[i],
