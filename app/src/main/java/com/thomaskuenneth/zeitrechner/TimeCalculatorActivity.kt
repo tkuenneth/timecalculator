@@ -10,10 +10,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
+import androidx.lifecycle.lifecycleScope
+import androidx.window.layout.*
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -22,31 +25,41 @@ class TimeCalculatorActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            MaterialTheme(
-                content = {
-                    Scaffold(
-                        topBar = {
-                            SmallTopAppBar(title = {
-                                Text(stringResource(id = R.string.app_name))
-                            })
+        lifecycleScope.launchWhenResumed {
+            setContent {
+                val layoutInfo by WindowInfoTracker.getOrCreate(this@TimeCalculatorActivity)
+                    .windowLayoutInfo(this@TimeCalculatorActivity).collectAsState(
+                        initial = null
+                    )
+                val windowMetrics = WindowMetricsCalculator.getOrCreate()
+                    .computeCurrentWindowMetrics(this@TimeCalculatorActivity)
+                MaterialTheme(
+                    content = {
+                        Scaffold(
+                            topBar = {
+                                SmallTopAppBar(title = {
+                                    Text(stringResource(id = R.string.app_name))
+                                })
+                            }
+                        ) {
+                            Content(
+                                layoutInfo,
+                                windowMetrics
+                            )
                         }
-                    ) {
-                        Content()
-                    }
-                },
-                colorScheme = if (isSystemInDarkTheme())
-                    darkColorScheme()
-                else
-                    lightColorScheme()
-            )
+                    },
+                    colorScheme = if (isSystemInDarkTheme())
+                        darkColorScheme()
+                    else
+                        lightColorScheme()
+                )
+            }
         }
     }
 }
 
-@Preview
 @Composable
-fun Content() {
+fun Content(layoutInfo: WindowLayoutInfo?, windowMetrics: WindowMetrics) {
     val input = remember { mutableStateOf("") }
     val output = remember { mutableStateOf("") }
     val result = remember { mutableStateOf(0) }
@@ -59,57 +72,72 @@ fun Content() {
             state.animateScrollTo(state.maxValue)
         }
     }
-    Column(
+    val hingeDef = createHingeDef(layoutInfo, windowMetrics)
+    val largeScreen = windowWidthDp(windowMetrics) >= 600.dp
+    val width = if (hingeDef.hasGap)
+        hingeDef.sizeLeft
+    else
+        600.dp
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = MaterialTheme.colorScheme.tertiaryContainer),
+        contentAlignment = if (hingeDef.hasGap and largeScreen)
+            Alignment.TopStart
+        else
+            Alignment.Center
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
-                .weight(1.0F)
+                .width(min(maxWidth, width))
+                .background(color = MaterialTheme.colorScheme.surface)
         ) {
-            TimeInput(input.value)
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(1.0F)
+            ) {
+                TimeInput(input.value)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = output.value,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1.0f)
+                        .verticalScroll(state = state),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = output.value,
-                color = MaterialTheme.colorScheme.primary,
-                modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1.0f)
-                    .verticalScroll(state = state),
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Column(
-            modifier = Modifier
-                .background(color = MaterialTheme.colorScheme.surfaceVariant)
-                .padding(16.dp)
+            Column(
+                modifier = Modifier
+                    .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(16.dp)
 
-        ) {
-            NumKeypadRow(
-                listOf("7", "8", "9", "CE"),
-                listOf(0.25f, 0.25f, 0.25f, 0.25f),
-                callback
-            )
-            NumKeypadRow(
-                listOf("4", "5", "6", "-"),
-                listOf(0.25f, 0.25f, 0.25f, 0.25f),
-                callback
-            )
-            NumKeypadRow(
-                listOf("1", "2", "3", "+"),
-                listOf(0.25f, 0.25f, 0.25f, 0.25f),
-                callback
-            )
-            NumKeypadRow(
-                listOf("0", ":", "="),
-                listOf(0.5f, 0.25f, 0.25f),
-                callback
-            )
-
+            ) {
+                NumKeypadRow(
+                    listOf("7", "8", "9", "CE"),
+                    listOf(0.25f, 0.25f, 0.25f, 0.25f),
+                    callback
+                )
+                NumKeypadRow(
+                    listOf("4", "5", "6", "-"),
+                    listOf(0.25f, 0.25f, 0.25f, 0.25f),
+                    callback
+                )
+                NumKeypadRow(
+                    listOf("1", "2", "3", "+"),
+                    listOf(0.25f, 0.25f, 0.25f, 0.25f),
+                    callback
+                )
+                NumKeypadRow(
+                    listOf("0", ":", "="),
+                    listOf(0.5f, 0.25f, 0.25f),
+                    callback
+                )
+            }
         }
     }
 }
