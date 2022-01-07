@@ -2,4 +2,10 @@
 <resources>
     <string name="app_name">Zeitrechner</string>
     <string name="input_hint">hh:mm oder mm</string>
+
+    <string name="info1">Geben Sie bis zu drei Ziffern ein, um nur Minuten anzugeben. Beispielsweise wird 90 interpretiert als 1 Stunde 30 Minuten.</string>
+    <string name="info2">Geben Sie exakt 4 Ziffern ein, um Stunden und Minuten anzugeben. Zum Beispiel wird 0030 als 30 Minuten interpretiert.</string>
+    <string name="info3">Der Doppelpunkt trennt Stunden und Minuten, deshalb wird :30 als 30 Minuten interpretiert, wohingegen 2: als 2 Stunden interpretiert wird.</string>
+    <string name="info4">Nachdem Sie eine Zeit eingegeben haben, drücken Sie + oder -. Geben Sie dann die nächste Zeit ein. Wiederholen Sie dies so oft wie nötig. = zeigt das Ergebnis. Das Ergebnis wird als die nächste Zeit verwendet. Sie können deshalb mit + oder - fortfahren.</string>
+
 </resources>

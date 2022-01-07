@@ -89,56 +89,76 @@ fun Content(layoutInfo: WindowLayoutInfo?, windowMetrics: WindowMetrics) {
             else
                 600.dp
         )
-        Column(
+        Row(
             modifier = Modifier
-                .width(width)
+                .fillMaxSize()
                 .background(color = MaterialTheme.colorScheme.surface)
         ) {
             Column(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .weight(1.0F)
+                    .width(width)
             ) {
-                TimeInput(input.value)
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .weight(1.0F)
+                ) {
+                    TimeInput(input.value)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = output.value,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1.0f)
+                            .verticalScroll(state = state),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = output.value,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1.0f)
-                        .verticalScroll(state = state),
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                Column(
+                    modifier = Modifier
+                        .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(16.dp)
+
+                ) {
+                    NumKeypadRow(
+                        listOf("7", "8", "9", "CE"),
+                        listOf(0.25f, 0.25f, 0.25f, 0.25f),
+                        callback
+                    )
+                    NumKeypadRow(
+                        listOf("4", "5", "6", "-"),
+                        listOf(0.25f, 0.25f, 0.25f, 0.25f),
+                        callback
+                    )
+                    NumKeypadRow(
+                        listOf("1", "2", "3", "+"),
+                        listOf(0.25f, 0.25f, 0.25f, 0.25f),
+                        callback
+                    )
+                    NumKeypadRow(
+                        listOf("0", ":", "="),
+                        listOf(0.5f, 0.25f, 0.25f),
+                        callback
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.width(hingeDef.widthGap))
             Column(
                 modifier = Modifier
-                    .background(color = MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(16.dp)
-
+                    .width(hingeDef.sizeRight)
+                    .fillMaxHeight()
+                    .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                NumKeypadRow(
-                    listOf("7", "8", "9", "CE"),
-                    listOf(0.25f, 0.25f, 0.25f, 0.25f),
-                    callback
-                )
-                NumKeypadRow(
-                    listOf("4", "5", "6", "-"),
-                    listOf(0.25f, 0.25f, 0.25f, 0.25f),
-                    callback
-                )
-                NumKeypadRow(
-                    listOf("1", "2", "3", "+"),
-                    listOf(0.25f, 0.25f, 0.25f, 0.25f),
-                    callback
-                )
-                NumKeypadRow(
-                    listOf("0", ":", "="),
-                    listOf(0.5f, 0.25f, 0.25f),
-                    callback
-                )
+                Text(text = stringResource(id = R.string.info1))
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = stringResource(id = R.string.info2))
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = stringResource(id = R.string.info3))
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = stringResource(id = R.string.info4))
             }
         }
     }
