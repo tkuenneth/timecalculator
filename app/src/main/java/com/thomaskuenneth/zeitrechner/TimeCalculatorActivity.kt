@@ -74,10 +74,6 @@ fun Content(layoutInfo: WindowLayoutInfo?, windowMetrics: WindowMetrics) {
     }
     val hingeDef = createHingeDef(layoutInfo, windowMetrics)
     val largeScreen = windowWidthDp(windowMetrics) >= 600.dp
-    val width = if (hingeDef.hasGap)
-        hingeDef.sizeLeft
-    else
-        600.dp
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -87,9 +83,15 @@ fun Content(layoutInfo: WindowLayoutInfo?, windowMetrics: WindowMetrics) {
         else
             Alignment.Center
     ) {
+        val width = min(
+            maxWidth, if (hingeDef.hasGap)
+                hingeDef.sizeLeft
+            else
+                600.dp
+        )
         Column(
             modifier = Modifier
-                .width(min(maxWidth, width))
+                .width(width)
                 .background(color = MaterialTheme.colorScheme.surface)
         ) {
             Column(
