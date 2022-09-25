@@ -2,14 +2,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion "31.0.0"
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.thomaskuenneth.zeitrechner"
         minSdkVersion 23
-        targetSdkVersion 31
-        versionCode 4
+        targetSdkVersion 33
+        versionCode 5
         versionName "1.0"
     }
 
@@ -34,8 +33,9 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion compose_version
+        kotlinCompilerExtensionVersion "1.2.0"
     }
+    namespace 'com.thomaskuenneth.zeitrechner'
 
 }
 
@@ -47,15 +47,15 @@ repositories {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.appcompat:appcompat:1.4.0'
-    implementation "androidx.core:core-ktx:1.7.0"
-    implementation 'androidx.activity:activity-compose:1.4.0'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation "androidx.core:core-ktx:1.9.0"
+    implementation 'androidx.activity:activity-compose:1.6.0'
 
     implementation "androidx.compose.ui:ui:$compose_version"
-    implementation "androidx.compose.material3:material3:1.0.0-alpha02"
+    implementation "androidx.compose.material3:material3:1.0.0-beta03"
     implementation "androidx.compose.ui:ui-tooling:$compose_version"
 
     testImplementation 'junit:junit:4.13.2'
 
-    implementation "androidx.window:window:1.0.0-rc01"
+    implementation "androidx.window:window:1.1.0-alpha03"
 }
