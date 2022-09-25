@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -68,10 +69,10 @@ fun Content(
     windowMetrics: WindowMetrics,
     paddingValues: PaddingValues
 ) {
-    val input = remember { mutableStateOf("") }
-    val output = remember { mutableStateOf("") }
-    val result = remember { mutableStateOf(0) }
-    val lastOp = remember { mutableStateOf("") }
+    val input = rememberSaveable { mutableStateOf("") }
+    val output = rememberSaveable { mutableStateOf("") }
+    val result = rememberSaveable { mutableStateOf(0) }
+    val lastOp = rememberSaveable { mutableStateOf("") }
     val state = rememberScrollState()
     val scope = rememberCoroutineScope()
     val callback = { text: String ->
