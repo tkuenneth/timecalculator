@@ -16,7 +16,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.lifecycle.lifecycleScope
-import androidx.window.layout.*
+import androidx.window.layout.WindowInfoTracker
+import androidx.window.layout.WindowLayoutInfo
+import androidx.window.layout.WindowMetrics
+import androidx.window.layout.WindowMetricsCalculator
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -37,14 +40,15 @@ class TimeCalculatorActivity : ComponentActivity() {
                     content = {
                         Scaffold(
                             topBar = {
-                                SmallTopAppBar(title = {
+                                TopAppBar(title = {
                                     Text(stringResource(id = R.string.app_name))
                                 })
                             }
                         ) {
                             Content(
                                 layoutInfo,
-                                windowMetrics
+                                windowMetrics,
+                                it
                             )
                         }
                     },
@@ -59,7 +63,11 @@ class TimeCalculatorActivity : ComponentActivity() {
 }
 
 @Composable
-fun Content(layoutInfo: WindowLayoutInfo?, windowMetrics: WindowMetrics) {
+fun Content(
+    layoutInfo: WindowLayoutInfo?,
+    windowMetrics: WindowMetrics,
+    paddingValues: PaddingValues
+) {
     val input = remember { mutableStateOf("") }
     val output = remember { mutableStateOf("") }
     val result = remember { mutableStateOf(0) }
@@ -77,6 +85,7 @@ fun Content(layoutInfo: WindowLayoutInfo?, windowMetrics: WindowMetrics) {
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
+            .padding(paddingValues = paddingValues)
             .background(color = MaterialTheme.colorScheme.tertiaryContainer),
         contentAlignment = if (hingeDef.hasGap and largeScreen)
             Alignment.TopStart
