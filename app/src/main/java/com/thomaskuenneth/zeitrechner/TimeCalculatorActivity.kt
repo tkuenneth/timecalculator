@@ -3,11 +3,8 @@ package com.thomaskuenneth.zeitrechner
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -82,95 +79,138 @@ fun Content(
         }
     }
     val hingeDef = createHingeDef(layoutInfo, windowMetrics)
-    val largeScreen = windowWidthDp(windowMetrics) >= 600.dp
+    val isLargeScreen = windowWidthDp(windowMetrics) >= 600.dp
+    val isFoldable = hingeDef.sizeLeft > 0.dp && hingeDef.sizeRight > 0.dp
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues = paddingValues)
             .background(color = MaterialTheme.colorScheme.tertiaryContainer),
-        contentAlignment = if (hingeDef.hasGap and largeScreen)
+        contentAlignment = if (isFoldable || isLargeScreen)
             Alignment.TopStart
         else
             Alignment.Center
     ) {
-        val width = min(
-            maxWidth, if (hingeDef.hasGap)
-                hingeDef.sizeLeft
-            else
-                600.dp
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(
+        if (isFoldable || !isLargeScreen) {
+            val leftColumnWidth = min(maxWidth, if (isFoldable) hingeDef.sizeLeft else 600.dp)
+            Row(
                 modifier = Modifier
-                    .width(width)
+                    .fillMaxSize()
+                    .background(color = MaterialTheme.colorScheme.surface)
             ) {
+                // left column
                 Column(
                     modifier = Modifier
-                        .padding(16.dp)
-                        .weight(1.0F)
+                        .width(leftColumnWidth)
                 ) {
-                    TimeInput(input.value)
+                    TimesAndResults(
+                        modifier = Modifier.weight(1.0F),
+                        input = input,
+                        output = output,
+                        state = state
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = output.value,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1.0f)
-                            .verticalScroll(state = state),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    NumKeypad(callback = callback)
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                Column(
-                    modifier = Modifier
-                        .background(color = MaterialTheme.colorScheme.surfaceVariant)
-                        .padding(16.dp)
-
-                ) {
-                    NumKeypadRow(
-                        listOf("7", "8", "9", "CE"),
-                        listOf(0.25f, 0.25f, 0.25f, 0.25f),
-                        callback
-                    )
-                    NumKeypadRow(
-                        listOf("4", "5", "6", "-"),
-                        listOf(0.25f, 0.25f, 0.25f, 0.25f),
-                        callback
-                    )
-                    NumKeypadRow(
-                        listOf("1", "2", "3", "+"),
-                        listOf(0.25f, 0.25f, 0.25f, 0.25f),
-                        callback
-                    )
-                    NumKeypadRow(
-                        listOf("0", ":", "="),
-                        listOf(0.5f, 0.25f, 0.25f),
-                        callback
-                    )
+                // optional right column
+                if (isFoldable) {
+                    if (hingeDef.hasGap) {
+                        Spacer(modifier = Modifier.width(hingeDef.widthGap))
+                    }
+                    Column(
+                        modifier = Modifier
+                            .width(hingeDef.sizeRight)
+                            .fillMaxHeight()
+                            .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = stringResource(id = R.string.info1))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(text = stringResource(id = R.string.info2))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(text = stringResource(id = R.string.info3))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(text = stringResource(id = R.string.info4))
+                    }
                 }
             }
-            Spacer(modifier = Modifier.width(hingeDef.widthGap))
-            Column(
+        } else {
+            val spacerWidth = 26.dp
+            val width = (maxWidth - spacerWidth) / 2
+            Row(
                 modifier = Modifier
-                    .width(hingeDef.sizeRight)
-                    .fillMaxHeight()
-                    .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxSize()
+                    .background(color = MaterialTheme.colorScheme.surface)
             ) {
-                Text(text = stringResource(id = R.string.info1))
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = stringResource(id = R.string.info2))
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = stringResource(id = R.string.info3))
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = stringResource(id = R.string.info4))
+                NumKeypad(
+                    modifier = Modifier.width(width = width),
+                    callback = callback
+                )
+                Spacer(modifier = Modifier.width(spacerWidth))
+                TimesAndResults(
+                    modifier = Modifier.width(width),
+                    input = input,
+                    output = output,
+                    state = state
+                )
             }
         }
+    }
+}
+
+@Composable
+fun TimesAndResults(
+    modifier: Modifier,
+    input: MutableState<String>,
+    output: MutableState<String>,
+    state: ScrollState
+) {
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+    ) {
+        TimeInput(input.value)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = output.value,
+            color = MaterialTheme.colorScheme.primary,
+            modifier =
+            Modifier
+                .fillMaxWidth()
+                .weight(1.0f)
+                .verticalScroll(state = state),
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Composable
+fun NumKeypad(modifier: Modifier = Modifier, callback: (text: String) -> Any) {
+    Column(
+        modifier = modifier
+            .background(color = MaterialTheme.colorScheme.surfaceVariant)
+            .padding(16.dp)
+
+    ) {
+        NumKeypadRow(
+            listOf("7", "8", "9", "CE"),
+            listOf(0.25f, 0.25f, 0.25f, 0.25f),
+            callback
+        )
+        NumKeypadRow(
+            listOf("4", "5", "6", "-"),
+            listOf(0.25f, 0.25f, 0.25f, 0.25f),
+            callback
+        )
+        NumKeypadRow(
+            listOf("1", "2", "3", "+"),
+            listOf(0.25f, 0.25f, 0.25f, 0.25f),
+            callback
+        )
+        NumKeypadRow(
+            listOf("0", ":", "="),
+            listOf(0.5f, 0.25f, 0.25f),
+            callback
+        )
     }
 }
 
