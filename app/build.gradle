@@ -8,8 +8,8 @@ android {
         applicationId "com.thomaskuenneth.zeitrechner"
         minSdkVersion 23
         targetSdkVersion 33
-        versionCode 5
-        versionName "1.0"
+        versionCode 6
+        versionName "1.1"
     }
 
     buildTypes {
@@ -49,13 +49,13 @@ dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation "androidx.core:core-ktx:1.9.0"
-    implementation 'androidx.activity:activity-compose:1.6.0'
+    implementation 'androidx.activity:activity-compose:1.6.1'
 
     implementation "androidx.compose.ui:ui:$compose_version"
-    implementation "androidx.compose.material3:material3:1.0.0-beta03"
+    implementation "androidx.compose.material3:material3:1.1.0-alpha02"
     implementation "androidx.compose.ui:ui-tooling:$compose_version"
 
     testImplementation 'junit:junit:4.13.2'
 
-    implementation "androidx.window:window:1.1.0-alpha03"
+    implementation "androidx.window:window:1.1.0-alpha04"
 }
