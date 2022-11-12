@@ -1,5 +1,6 @@
 package com.thomaskuenneth.zeitrechner
 
+import android.graphics.Rect
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -8,10 +9,11 @@ import androidx.window.layout.WindowLayoutInfo
 import androidx.window.layout.WindowMetrics
 
 data class HingeDef(
-    val hasGap: Boolean,
-    val sizeLeft: Dp,
-    val sizeRight: Dp,
-    val widthGap: Dp
+    val hasVerticalGap: Boolean,
+    val hasHorizontalGap: Boolean,
+    val widthLeft: Dp,
+    val widthRight: Dp,
+    val boundsGap: Rect
 )
 
 @Composable
@@ -19,25 +21,29 @@ fun createHingeDef(
     layoutInfo: WindowLayoutInfo?,
     windowMetrics: WindowMetrics
 ): HingeDef {
-    var hasGap = false
-    var sizeLeft = 0
-    var sizeRight = 0
-    var widthGap = 0
+    var hasVerticalGap = false
+    var hasHorizontalGap = false
+    var widthLeft = 0
+    var widthRight = 0
+    var boundsGap = Rect(0, 0, 0, 0)
     layoutInfo?.displayFeatures?.forEach { displayFeature ->
         (displayFeature as FoldingFeature).run {
-            hasGap = occlusionType == FoldingFeature.OcclusionType.FULL
+            hasVerticalGap = occlusionType == FoldingFeature.OcclusionType.FULL
                     && orientation == FoldingFeature.Orientation.VERTICAL
-            sizeLeft = bounds.left
-            sizeRight = windowMetrics.bounds.width() - bounds.right
-            widthGap = bounds.width()
+            hasHorizontalGap = occlusionType == FoldingFeature.OcclusionType.FULL
+                    && orientation == FoldingFeature.Orientation.HORIZONTAL
+            widthLeft = bounds.left
+            widthRight = windowMetrics.bounds.width() - bounds.right
+            boundsGap = bounds
         }
     }
     return with(LocalDensity.current) {
         HingeDef(
-            hasGap,
-            sizeLeft.toDp(),
-            sizeRight.toDp(),
-            widthGap.toDp()
+            hasVerticalGap,
+            hasHorizontalGap,
+            widthLeft.toDp(),
+            widthRight.toDp(),
+            boundsGap
         )
     }
 }
