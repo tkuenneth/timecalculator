@@ -18,11 +18,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
+import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowLayoutInfo
 import androidx.window.layout.WindowMetrics
 import kotlinx.coroutines.launch
@@ -48,74 +47,161 @@ fun Content(
     }
     val hingeDef = createHingeDef(layoutInfo, windowMetrics)
     val isLargeScreen = windowWidthDp(windowMetrics) >= 600.dp
-    val isFoldable = hingeDef.widthLeft > 0.dp && hingeDef.widthRight > 0.dp
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues = paddingValues)
-            .background(color = MaterialTheme.colorScheme.tertiaryContainer)
     ) {
-        if (isFoldable || !isLargeScreen) {
-            val leftColumnWidth = if (isFoldable) hingeDef.widthLeft else maxWidth
+        if (hingeDef.foldOrientation != null) {
+            FoldableScreen(
+                foldRunsVertically = hingeDef.foldOrientation == FoldingFeature.Orientation.VERTICAL,
+                firstComposable = {
+                    SmartphoneScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        input = input,
+                        output = output,
+                        state = state,
+                        callback = callback
+                    )
+                },
+                secondComposable = {
+                    Spacer(
+                        modifier = Modifier
+                            .width(hingeDef.foldWidth)
+                            .height(hingeDef.foldHeight)
+                    )
+                }
+            ) {
+                Help(
+                    modifier = Modifier
+                        .width(hingeDef.widthRightOrBottom)
+                        .height(hingeDef.heightRightOrBottom)
+                )
+            }
+        } else if (!isLargeScreen) {
             Row(
                 modifier = Modifier
+                    .width(maxWidth)
                     .fillMaxSize()
                     .background(color = MaterialTheme.colorScheme.surface)
             ) {
-                // left column
-                Column(
-                    modifier = Modifier
-                        .width(leftColumnWidth)
-                        .fillMaxHeight()
-                ) {
-                    TimesAndResults(
-                        modifier = Modifier.weight(1.0F),
-                        input = input,
-                        output = output,
-                        state = state
-                    )
-                    NumKeypad(callback = callback)
-                }
-                // optional right column
-                if (isFoldable) {
-                    if (hingeDef.hasVerticalGap) {
-                        with(LocalDensity.current) {
-                            Spacer(modifier = Modifier.width(hingeDef.boundsGap.width().toDp()))
-                        }
-                    }
-                    Help(hingeDef.widthRight)
-                }
-            }
-        } else {
-            val width = min(maxWidth / 2, 400.dp)
-            val helpWidth = maxWidth - (width + width)
-            val shouldShowHelp = helpWidth >= 300.dp
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = MaterialTheme.colorScheme.surface),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                NumKeypad(
-                    modifier = Modifier.width(width = width),
-                    callback = callback
-                )
-                TimesAndResults(
-                    modifier = if (shouldShowHelp)
-                        Modifier.width(width)
-                    else
-                        Modifier.weight(1F),
+                SmartphoneScreen(
                     input = input,
                     output = output,
-                    state = state
+                    state = state,
+                    callback = callback
                 )
-                if (shouldShowHelp)
-                    Help(width = helpWidth)
             }
+        } else {
+            LargeScreen(
+                input = input,
+                output = output,
+                state = state,
+                callback = callback
+            )
         }
     }
 }
 
+@Composable
+fun FoldableScreen(
+    foldRunsVertically: Boolean,
+    firstComposable: @Composable () -> Unit,
+    secondComposable: @Composable () -> Unit,
+    thirdComposable: @Composable () -> Unit
+) {
+    if (foldRunsVertically) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.surface)
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1F)
+                    .fillMaxHeight()
+            ) {
+                firstComposable()
+            }
+            secondComposable()
+            thirdComposable()
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.surface)
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1F)
+                    .fillMaxWidth()
+            ) {
+                firstComposable()
+            }
+            secondComposable()
+            thirdComposable()
+        }
+    }
+}
+
+@Composable
+fun SmartphoneScreen(
+    modifier: Modifier = Modifier,
+    input: MutableState<String>,
+    output: MutableState<String>,
+    state: ScrollState,
+    callback: (text: String) -> Any
+) {
+
+    // left column
+    Column(
+        modifier = modifier
+            .fillMaxHeight()
+    ) {
+        TimesAndResults(
+            modifier = Modifier.weight(1.0F),
+            input = input,
+            output = output,
+            state = state
+        )
+        NumKeypad(callback = callback)
+    }
+}
+
+@Composable
+fun BoxWithConstraintsScope.LargeScreen(
+    input: MutableState<String>,
+    output: MutableState<String>,
+    state: ScrollState,
+    callback: (text: String) -> Any
+) {
+    val width = min(maxWidth / 2, 400.dp)
+    val helpWidth = maxWidth - (width + width)
+    val shouldShowHelp = helpWidth >= 300.dp
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.surface),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        NumKeypad(
+            modifier = Modifier.width(width = width),
+            callback = callback
+        )
+        TimesAndResults(
+            modifier = if (shouldShowHelp)
+                Modifier.width(width)
+            else
+                Modifier.weight(1F),
+            input = input,
+            output = output,
+            state = state
+        )
+//        if (shouldShowHelp)
+//            Help(width = helpWidth)
+    }
+}
 
 @Composable
 fun TimesAndResults(
@@ -226,11 +312,9 @@ fun MyButton(
 }
 
 @Composable
-fun Help(width: Dp) {
+fun Help(modifier: Modifier) {
     LazyColumn(
-        modifier = Modifier
-            .width(width)
-            .fillMaxHeight()
+        modifier = modifier
             .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val items = listOf(R.string.info1, R.string.info2, R.string.info3, R.string.info4)
