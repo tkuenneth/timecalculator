@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowLayoutInfo
 import androidx.window.layout.WindowMetrics
@@ -46,6 +47,8 @@ fun Content(
     }
     val hingeDef = createHingeDef(layoutInfo, windowMetrics)
     val isLargeScreen = windowWidthDp(windowMetrics) >= 600.dp
+            && windowHeightDp(windowMetrics) >= 500.dp
+    val isPortrait = windowWidthDp(windowMetrics) / windowHeightDp(windowMetrics) <= 1F
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -60,7 +63,8 @@ fun Content(
                         input = input,
                         output = output,
                         state = state,
-                        callback = callback
+                        callback = callback,
+                        isPortrait = isPortrait
                     )
                 },
                 secondComposable = {
@@ -78,19 +82,16 @@ fun Content(
                 )
             }
         } else if (!isLargeScreen) {
-            Row(
+            SmartphoneScreen(
                 modifier = Modifier
-                    .width(maxWidth)
                     .fillMaxSize()
-                    .background(color = MaterialTheme.colorScheme.surface)
-            ) {
-                SmartphoneScreen(
-                    input = input,
-                    output = output,
-                    state = state,
-                    callback = callback
-                )
-            }
+                    .background(color = MaterialTheme.colorScheme.surface),
+                input = input,
+                output = output,
+                state = state,
+                callback = callback,
+                isPortrait = isPortrait
+            )
         } else {
             LargeScreen(
                 input = input,
@@ -150,44 +151,74 @@ fun SmartphoneScreen(
     input: MutableState<String>,
     output: MutableState<String>,
     state: ScrollState,
-    callback: (text: String) -> Any
+    callback: (text: String) -> Any,
+    isPortrait: Boolean
 ) {
-
-    // left column
-    Column(
-        modifier = modifier
-            .fillMaxHeight()
-    ) {
-        TimesAndResults(
-            modifier = Modifier.weight(1.0F),
-            input = input,
-            output = output,
-            state = state
-        )
-        NumKeypad(callback = callback)
+    if (isPortrait) {
+        Column(
+            modifier = modifier
+                .fillMaxHeight()
+        ) {
+            TimesAndResults(
+                modifier = Modifier.weight(1.0F),
+                input = input,
+                output = output,
+                state = state
+            )
+            NumKeypad(callback = callback)
+        }
+    } else {
+        Row(
+            modifier = modifier.fillMaxSize(),
+            verticalAlignment = Alignment.Top
+        ) {
+            NumKeypad(
+                callback = callback,
+                modifier = Modifier
+                    .weight(0.5F)
+                    .align(Alignment.Bottom)
+            )
+            TimesAndResults(
+                modifier = Modifier.weight(0.5F),
+                input = input,
+                output = output,
+                state = state
+            )
+        }
     }
 }
 
 @Composable
-fun LargeScreen(
+fun BoxWithConstraintsScope.LargeScreen(
     input: MutableState<String>,
     output: MutableState<String>,
     state: ScrollState,
     callback: (text: String) -> Any
 ) {
+    val width = min(maxWidth / 2, 400.dp)
+    val helpWidth = maxWidth - (width + width)
+    val shouldShowHelp = helpWidth >= 300.dp
     Row(
         modifier = Modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surface),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.Bottom
     ) {
-        SmartphoneScreen(
-            modifier = Modifier.width(400.dp),
+        NumKeypad(
+            modifier = Modifier.width(width = width),
+            callback = callback
+        )
+        TimesAndResults(
+            modifier = if (shouldShowHelp)
+                Modifier.width(width)
+            else
+                Modifier.weight(1F),
             input = input,
             output = output,
-            state = state, callback = callback
+            state = state
         )
-        Help(modifier = Modifier.weight(1F))
+        if (shouldShowHelp)
+            Help(modifier = Modifier.weight(1F))
     }
 }
 
@@ -222,7 +253,6 @@ fun NumKeypad(modifier: Modifier = Modifier, callback: (text: String) -> Any) {
         modifier = modifier
             .background(color = MaterialTheme.colorScheme.surfaceVariant)
             .padding(16.dp)
-
     ) {
         NumKeypadRow(
             listOf("7", "8", "9", "CE"),
@@ -303,6 +333,7 @@ fun MyButton(
 fun Help(modifier: Modifier) {
     LazyColumn(
         modifier = modifier
+            .fillMaxHeight()
             .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val items = listOf(R.string.info1, R.string.info2, R.string.info3, R.string.info4)
