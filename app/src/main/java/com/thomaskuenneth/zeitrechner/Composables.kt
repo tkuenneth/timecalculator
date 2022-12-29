@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowLayoutInfo
 import androidx.window.layout.WindowMetrics
@@ -170,36 +169,25 @@ fun SmartphoneScreen(
 }
 
 @Composable
-fun BoxWithConstraintsScope.LargeScreen(
+fun LargeScreen(
     input: MutableState<String>,
     output: MutableState<String>,
     state: ScrollState,
     callback: (text: String) -> Any
 ) {
-    val width = min(maxWidth / 2, 400.dp)
-    val helpWidth = maxWidth - (width + width)
-    val shouldShowHelp = helpWidth >= 300.dp
     Row(
         modifier = Modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surface),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
-        NumKeypad(
-            modifier = Modifier.width(width = width),
-            callback = callback
-        )
-        TimesAndResults(
-            modifier = if (shouldShowHelp)
-                Modifier.width(width)
-            else
-                Modifier.weight(1F),
+        SmartphoneScreen(
+            modifier = Modifier.width(400.dp),
             input = input,
             output = output,
-            state = state
+            state = state, callback = callback
         )
-//        if (shouldShowHelp)
-//            Help(width = helpWidth)
+        Help(modifier = Modifier.weight(1F))
     }
 }
 
