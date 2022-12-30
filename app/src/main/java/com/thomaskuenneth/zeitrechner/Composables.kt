@@ -18,6 +18,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType.Companion.LongPress
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
@@ -55,8 +57,9 @@ fun Content(
             .padding(paddingValues = paddingValues)
     ) {
         if (hingeDef.foldOrientation != null) {
+            val foldRunsVertically = hingeDef.foldOrientation == FoldingFeature.Orientation.VERTICAL
             FoldableScreen(
-                foldRunsVertically = hingeDef.foldOrientation == FoldingFeature.Orientation.VERTICAL,
+                foldRunsVertically = foldRunsVertically,
                 firstComposable = {
                     SmartphoneScreen(
                         modifier = Modifier.fillMaxSize(),
@@ -64,7 +67,7 @@ fun Content(
                         output = output,
                         state = state,
                         callback = callback,
-                        isPortrait = isPortrait
+                        isPortrait = foldRunsVertically
                     )
                 },
                 secondComposable = {
@@ -318,10 +321,12 @@ fun MyButton(
     callback: (text: String) -> Any,
     modifier: Modifier = Modifier
 ) {
+    val hapticFeedback = LocalHapticFeedback.current
     Button(
         modifier = modifier
             .padding(4.dp),
         onClick = {
+            hapticFeedback.performHapticFeedback(hapticFeedbackType = LongPress)
             callback(text)
         }
     ) {
