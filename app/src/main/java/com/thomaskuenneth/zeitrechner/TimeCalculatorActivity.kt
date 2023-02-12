@@ -8,44 +8,49 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.window.layout.WindowInfoTracker
 import androidx.window.layout.WindowMetricsCalculator
+import kotlinx.coroutines.launch
 
 @ExperimentalMaterial3Api
 class TimeCalculatorActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lifecycleScope.launchWhenResumed {
-            setContent {
-                val layoutInfo by WindowInfoTracker.getOrCreate(this@TimeCalculatorActivity)
-                    .windowLayoutInfo(this@TimeCalculatorActivity).collectAsState(
-                        initial = null
-                    )
-                val windowMetrics = WindowMetricsCalculator.getOrCreate()
-                    .computeCurrentWindowMetrics(this@TimeCalculatorActivity)
-                MaterialTheme(
-                    content = {
-                        Scaffold(
-                            topBar = {
-                                TopAppBar(title = {
-                                    Text(stringResource(id = R.string.app_name))
-                                })
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                setContent {
+                    val layoutInfo by WindowInfoTracker.getOrCreate(this@TimeCalculatorActivity)
+                        .windowLayoutInfo(this@TimeCalculatorActivity).collectAsState(
+                            initial = null
+                        )
+                    val windowMetrics = WindowMetricsCalculator.getOrCreate()
+                        .computeCurrentWindowMetrics(this@TimeCalculatorActivity)
+                    MaterialTheme(
+                        content = {
+                            Scaffold(
+                                topBar = {
+                                    TopAppBar(title = {
+                                        Text(stringResource(id = R.string.app_name))
+                                    })
+                                }
+                            ) {
+                                Content(
+                                    layoutInfo,
+                                    windowMetrics,
+                                    it
+                                )
                             }
-                        ) {
-                            Content(
-                                layoutInfo,
-                                windowMetrics,
-                                it
-                            )
-                        }
-                    },
-                    colorScheme = if (isSystemInDarkTheme())
-                        darkColorScheme()
-                    else
-                        lightColorScheme()
-                )
+                        },
+                        colorScheme = if (isSystemInDarkTheme())
+                            darkColorScheme()
+                        else
+                            lightColorScheme()
+                    )
+                }
             }
         }
     }

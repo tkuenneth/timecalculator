@@ -306,7 +306,7 @@ fun NumKeypadRow(
         modifier = Modifier.fillMaxWidth()
     ) {
         for (i in texts.indices) {
-            MyButton(
+            NumKeypadButton(
                 text = texts[i],
                 modifier = Modifier.weight(weights[i]),
                 callback = callback
@@ -316,7 +316,7 @@ fun NumKeypadRow(
 }
 
 @Composable
-fun MyButton(
+fun NumKeypadButton(
     text: String,
     callback: (text: String) -> Any,
     modifier: Modifier = Modifier
