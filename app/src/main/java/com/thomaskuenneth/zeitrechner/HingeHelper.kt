@@ -64,3 +64,8 @@ fun createHingeDef(
 fun windowWidthDp(windowMetrics: WindowMetrics): Dp = with(LocalDensity.current) {
     windowMetrics.bounds.width().toDp()
 }
+
+@Composable
+fun windowHeightDp(windowMetrics: WindowMetrics): Dp = with(LocalDensity.current) {
+    windowMetrics.bounds.height().toDp()
+}

@@ -18,6 +18,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType.Companion.LongPress
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
@@ -47,21 +49,25 @@ fun Content(
     }
     val hingeDef = createHingeDef(layoutInfo, windowMetrics)
     val isLargeScreen = windowWidthDp(windowMetrics) >= 600.dp
+            && windowHeightDp(windowMetrics) >= 500.dp
+    val isPortrait = windowWidthDp(windowMetrics) / windowHeightDp(windowMetrics) <= 1F
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues = paddingValues)
     ) {
         if (hingeDef.foldOrientation != null) {
+            val foldRunsVertically = hingeDef.foldOrientation == FoldingFeature.Orientation.VERTICAL
             FoldableScreen(
-                foldRunsVertically = hingeDef.foldOrientation == FoldingFeature.Orientation.VERTICAL,
+                foldRunsVertically = foldRunsVertically,
                 firstComposable = {
                     SmartphoneScreen(
                         modifier = Modifier.fillMaxSize(),
                         input = input,
                         output = output,
                         state = state,
-                        callback = callback
+                        callback = callback,
+                        isPortrait = foldRunsVertically
                     )
                 },
                 secondComposable = {
@@ -79,19 +85,16 @@ fun Content(
                 )
             }
         } else if (!isLargeScreen) {
-            Row(
+            SmartphoneScreen(
                 modifier = Modifier
-                    .width(maxWidth)
                     .fillMaxSize()
-                    .background(color = MaterialTheme.colorScheme.surface)
-            ) {
-                SmartphoneScreen(
-                    input = input,
-                    output = output,
-                    state = state,
-                    callback = callback
-                )
-            }
+                    .background(color = MaterialTheme.colorScheme.surface),
+                input = input,
+                output = output,
+                state = state,
+                callback = callback,
+                isPortrait = isPortrait
+            )
         } else {
             LargeScreen(
                 input = input,
@@ -151,21 +154,40 @@ fun SmartphoneScreen(
     input: MutableState<String>,
     output: MutableState<String>,
     state: ScrollState,
-    callback: (text: String) -> Any
+    callback: (text: String) -> Any,
+    isPortrait: Boolean
 ) {
-
-    // left column
-    Column(
-        modifier = modifier
-            .fillMaxHeight()
-    ) {
-        TimesAndResults(
-            modifier = Modifier.weight(1.0F),
-            input = input,
-            output = output,
-            state = state
-        )
-        NumKeypad(callback = callback)
+    if (isPortrait) {
+        Column(
+            modifier = modifier
+                .fillMaxHeight()
+        ) {
+            TimesAndResults(
+                modifier = Modifier.weight(1.0F),
+                input = input,
+                output = output,
+                state = state
+            )
+            NumKeypad(callback = callback)
+        }
+    } else {
+        Row(
+            modifier = modifier.fillMaxSize(),
+            verticalAlignment = Alignment.Top
+        ) {
+            NumKeypad(
+                callback = callback,
+                modifier = Modifier
+                    .weight(0.5F)
+                    .align(Alignment.Bottom)
+            )
+            TimesAndResults(
+                modifier = Modifier.weight(0.5F),
+                input = input,
+                output = output,
+                state = state
+            )
+        }
     }
 }
 
@@ -183,7 +205,7 @@ fun BoxWithConstraintsScope.LargeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surface),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Bottom
     ) {
         NumKeypad(
             modifier = Modifier.width(width = width),
@@ -198,8 +220,8 @@ fun BoxWithConstraintsScope.LargeScreen(
             output = output,
             state = state
         )
-//        if (shouldShowHelp)
-//            Help(width = helpWidth)
+        if (shouldShowHelp)
+            Help(modifier = Modifier.weight(1F))
     }
 }
 
@@ -234,7 +256,6 @@ fun NumKeypad(modifier: Modifier = Modifier, callback: (text: String) -> Any) {
         modifier = modifier
             .background(color = MaterialTheme.colorScheme.surfaceVariant)
             .padding(16.dp)
-
     ) {
         NumKeypadRow(
             listOf("7", "8", "9", "CE"),
@@ -285,7 +306,7 @@ fun NumKeypadRow(
         modifier = Modifier.fillMaxWidth()
     ) {
         for (i in texts.indices) {
-            MyButton(
+            NumKeypadButton(
                 text = texts[i],
                 modifier = Modifier.weight(weights[i]),
                 callback = callback
@@ -295,15 +316,17 @@ fun NumKeypadRow(
 }
 
 @Composable
-fun MyButton(
+fun NumKeypadButton(
     text: String,
     callback: (text: String) -> Any,
     modifier: Modifier = Modifier
 ) {
+    val hapticFeedback = LocalHapticFeedback.current
     Button(
         modifier = modifier
             .padding(4.dp),
         onClick = {
+            hapticFeedback.performHapticFeedback(hapticFeedbackType = LongPress)
             callback(text)
         }
     ) {
@@ -315,6 +338,7 @@ fun MyButton(
 fun Help(modifier: Modifier) {
     LazyColumn(
         modifier = modifier
+            .fillMaxHeight()
             .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val items = listOf(R.string.info1, R.string.info2, R.string.info3, R.string.info4)
