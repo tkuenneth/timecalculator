@@ -16,6 +16,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.window.core.layout.WindowHeightSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import eu.thomaskuenneth.adaptivescaffold.AdaptiveScaffold
 import eu.thomaskuenneth.adaptivescaffold.LocalWindowSizeClass
@@ -29,9 +30,6 @@ class TimeCalculatorActivity : ComponentActivity() {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 setContent {
-                    val widthSizeClassExpanded =
-                        LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.EXPANDED
-                    println(widthSizeClassExpanded)
                     val input = rememberSaveable { mutableStateOf("") }
                     val output = rememberSaveable { mutableStateOf("") }
                     val result = rememberSaveable { mutableStateOf(0) }
@@ -44,9 +42,9 @@ class TimeCalculatorActivity : ComponentActivity() {
                             state.animateScrollTo(state.maxValue)
                         }
                     }
-                    val content: @Composable (Panel) -> Unit = { panel ->
-                        Content(
-                            panel = panel,
+                    val content: @Composable (PanelType) -> Unit = { panel ->
+                        TimeCalculatorPanel(
+                            panelType = panel,
                             input = input.value,
                             output = output.value,
                             state = state,
@@ -63,23 +61,23 @@ class TimeCalculatorActivity : ComponentActivity() {
                                 destinations = emptyList(),
                                 body = {
                                     content(
-                                        if (widthSizeClassExpanded)
-                                            Panel.BOTH
+                                        if (shouldShowHelp())
+                                            PanelType.BOTH
                                         else
-                                            Panel.FIRST
+                                            PanelType.FIRST
                                     )
                                 },
                                 secondaryBody = {
-                                    if (widthSizeClassExpanded)
+                                    if (shouldShowHelp())
                                         Help()
                                     else
                                         content(
-                                            Panel.SECOND
+                                            PanelType.SECOND
                                         )
                                 },
                                 smallBody = {
                                     content(
-                                        Panel.BOTH
+                                        PanelType.BOTH
                                     )
                                 },
                                 smallSecondaryBody = null
@@ -94,4 +92,10 @@ class TimeCalculatorActivity : ComponentActivity() {
             }
         }
     }
+}
+
+@Composable
+fun shouldShowHelp() = with(LocalWindowSizeClass.current) {
+    widthSizeClass != WindowWidthSizeClass.COMPACT
+            && heightSizeClass != WindowHeightSizeClass.COMPACT
 }

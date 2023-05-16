@@ -15,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -29,31 +28,32 @@ import androidx.window.core.layout.WindowHeightSizeClass
 import eu.thomaskuenneth.adaptivescaffold.LocalWindowSizeClass
 import java.util.Locale
 
-enum class Panel {
+enum class PanelType {
     FIRST, SECOND, BOTH
 }
 
 @Composable
-fun Content(
-    panel: Panel,
+fun TimeCalculatorPanel(
+    panelType: PanelType,
     input: String,
     output: String,
     state: ScrollState,
     callback: (text: String) -> Any
 ) {
-    Surface(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.surface)
+            .background(color = MaterialTheme.colorScheme.surface),
+        contentAlignment = Alignment.BottomCenter
     ) {
-        when (panel) {
-            Panel.FIRST -> {
+        when (panelType) {
+            PanelType.FIRST -> {
                 NumKeypad(
                     callback = callback
                 )
             }
 
-            Panel.SECOND -> {
+            PanelType.SECOND -> {
                 TimesAndResults(
                     input = input,
                     output = output,
@@ -61,7 +61,7 @@ fun Content(
                 )
             }
 
-            Panel.BOTH -> {
+            PanelType.BOTH -> {
                 if (LocalWindowSizeClass.current.heightSizeClass != WindowHeightSizeClass.COMPACT) {
                     Column {
                         Box(modifier = Modifier.weight(1.0F)) {
@@ -82,11 +82,13 @@ fun Content(
                                 callback = callback
                             )
                         }
-                        TimesAndResults(
-                            input = input,
-                            output = output,
-                            state = state
-                        )
+                        Box(modifier = Modifier.weight(0.5F)) {
+                            TimesAndResults(
+                                input = input,
+                                output = output,
+                                state = state
+                            )
+                        }
                     }
                 }
             }
@@ -123,7 +125,7 @@ fun NumKeypad(
 ) {
     Column(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surfaceVariant)
+            .background(color = MaterialTheme.colorScheme.surface)
             .padding(16.dp)
     ) {
         NumKeypadRow(
