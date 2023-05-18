@@ -73,8 +73,7 @@ class TimeCalculatorActivity : ComponentActivity() {
                                     content(
                                         PanelType.BOTH
                                     )
-                                },
-                                smallSecondaryBody = null
+                                }
                             )
                         },
                         colorScheme = defaultColorScheme()
