@@ -13,10 +13,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.window.core.layout.WindowHeightSizeClass
-import androidx.window.core.layout.WindowWidthSizeClass
 import eu.thomaskuenneth.adaptivescaffold.AdaptiveScaffold
-import eu.thomaskuenneth.adaptivescaffold.LocalWindowSizeClass
 import eu.thomaskuenneth.adaptivescaffold.defaultColorScheme
 import kotlinx.coroutines.launch
 
@@ -28,23 +25,23 @@ class TimeCalculatorActivity : ComponentActivity() {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 setContent {
-                    val uiState = UiState(
-                        input = rememberSaveable { mutableStateOf("") },
-                        output = rememberSaveable { mutableStateOf("") },
-                        result = rememberSaveable { mutableStateOf(0) },
-                        lastOp = rememberSaveable { mutableStateOf("") },
-                        scope = rememberCoroutineScope(),
-                        scrollState = rememberScrollState()
-                    )
-                    val content: @Composable (PanelType) -> Unit = { panel ->
-                        TimeCalculatorPanel(
-                            panelType = panel,
-                            uiState = uiState
-                        )
-                    }
-
                     MaterialTheme(
                         content = {
+                            val uiState = UiState(
+                                input = rememberSaveable { mutableStateOf("") },
+                                output = rememberSaveable { mutableStateOf("") },
+                                result = rememberSaveable { mutableStateOf(0) },
+                                lastOp = rememberSaveable { mutableStateOf("") },
+                                scope = rememberCoroutineScope(),
+                                scrollState = rememberScrollState()
+                            )
+                            val content: @Composable (PanelType) -> Unit = { panel ->
+                                TimeCalculatorPanel(
+                                    panelType = panel,
+                                    uiState = uiState
+                                )
+                            }
+
                             AdaptiveScaffold(
                                 body = {
                                     content(
@@ -75,10 +72,4 @@ class TimeCalculatorActivity : ComponentActivity() {
             }
         }
     }
-}
-
-@Composable
-fun shouldShowHelp() = with(LocalWindowSizeClass.current) {
-    widthSizeClass != WindowWidthSizeClass.COMPACT
-            && heightSizeClass != WindowHeightSizeClass.COMPACT
 }

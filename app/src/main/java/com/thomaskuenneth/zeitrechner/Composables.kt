@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowHeightSizeClass
+import androidx.window.core.layout.WindowWidthSizeClass
 import eu.thomaskuenneth.adaptivescaffold.LocalWindowSizeClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -243,7 +244,13 @@ fun Help() {
     }
 }
 
-fun handleButtonClick(
+@Composable
+fun shouldShowHelp() = with(LocalWindowSizeClass.current) {
+    widthSizeClass != WindowWidthSizeClass.COMPACT
+            && heightSizeClass != WindowHeightSizeClass.COMPACT
+}
+
+private fun handleButtonClick(
     txt: String,
     inputTextView: MutableState<String>,
     outputTextView: MutableState<String>,
