@@ -28,25 +28,18 @@ class TimeCalculatorActivity : ComponentActivity() {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 setContent {
-                    val input = rememberSaveable { mutableStateOf("") }
-                    val output = rememberSaveable { mutableStateOf("") }
-                    val result = rememberSaveable { mutableStateOf(0) }
-                    val lastOp = rememberSaveable { mutableStateOf("") }
-                    val state = rememberScrollState()
-                    val scope = rememberCoroutineScope()
-                    val callback = { text: String ->
-                        handleButtonClick(text, input, output, lastOp, result)
-                        scope.launch {
-                            state.animateScrollTo(state.maxValue)
-                        }
-                    }
+                    val uiState = UiState(
+                        input = rememberSaveable { mutableStateOf("") },
+                        output = rememberSaveable { mutableStateOf("") },
+                        result = rememberSaveable { mutableStateOf(0) },
+                        lastOp = rememberSaveable { mutableStateOf("") },
+                        scope = rememberCoroutineScope(),
+                        scrollState = rememberScrollState()
+                    )
                     val content: @Composable (PanelType) -> Unit = { panel ->
                         TimeCalculatorPanel(
                             panelType = panel,
-                            input = input.value,
-                            output = output.value,
-                            state = state,
-                            callback = callback
+                            uiState = uiState
                         )
                     }
 

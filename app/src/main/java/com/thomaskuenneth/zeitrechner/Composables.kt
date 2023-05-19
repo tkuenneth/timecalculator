@@ -26,68 +26,85 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowHeightSizeClass
 import eu.thomaskuenneth.adaptivescaffold.LocalWindowSizeClass
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 enum class PanelType {
     FIRST, SECOND, BOTH
 }
 
+data class UiState(
+    val input: MutableState<String>,
+    val output: MutableState<String>,
+    val result: MutableState<Int>,
+    val lastOp: MutableState<String>,
+    val scope: CoroutineScope,
+    val scrollState: ScrollState
+) {
+    val callback = { text: String ->
+        handleButtonClick(text, input, output, lastOp, result)
+        scope.launch {
+            scrollState.animateScrollTo(Int.MAX_VALUE)
+        }
+    }
+}
+
 @Composable
 fun TimeCalculatorPanel(
     panelType: PanelType,
-    input: String,
-    output: String,
-    state: ScrollState,
-    callback: (text: String) -> Any
+    uiState: UiState
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.surface),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        when (panelType) {
-            PanelType.FIRST -> {
-                NumKeypad(
-                    callback = callback
-                )
-            }
+    with(uiState) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.surface),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            when (panelType) {
+                PanelType.FIRST -> {
+                    NumKeypad(
+                        callback = uiState.callback
+                    )
+                }
 
-            PanelType.SECOND -> {
-                TimesAndResults(
-                    input = input,
-                    output = output,
-                    state = state
-                )
-            }
+                PanelType.SECOND -> {
+                    TimesAndResults(
+                        input = input.value,
+                        output = output.value,
+                        state = scrollState
+                    )
+                }
 
-            PanelType.BOTH -> {
-                if (LocalWindowSizeClass.current.heightSizeClass != WindowHeightSizeClass.COMPACT) {
-                    Column {
-                        Box(modifier = Modifier.weight(1.0F)) {
-                            TimesAndResults(
-                                input = input,
-                                output = output,
-                                state = state
-                            )
-                        }
-                        NumKeypad(
-                            callback = callback
-                        )
-                    }
-                } else {
-                    Row {
-                        Box(modifier = Modifier.weight(0.5F)) {
+                PanelType.BOTH -> {
+                    if (LocalWindowSizeClass.current.heightSizeClass != WindowHeightSizeClass.COMPACT) {
+                        Column {
+                            Box(modifier = Modifier.weight(1.0F)) {
+                                TimesAndResults(
+                                    input = input.value,
+                                    output = output.value,
+                                    state = scrollState
+                                )
+                            }
                             NumKeypad(
                                 callback = callback
                             )
                         }
-                        Box(modifier = Modifier.weight(0.5F)) {
-                            TimesAndResults(
-                                input = input,
-                                output = output,
-                                state = state
-                            )
+                    } else {
+                        Row {
+                            Box(modifier = Modifier.weight(0.5F)) {
+                                NumKeypad(
+                                    callback = callback
+                                )
+                            }
+                            Box(modifier = Modifier.weight(0.5F)) {
+                                TimesAndResults(
+                                    input = input.value,
+                                    output = output.value,
+                                    state = scrollState
+                                )
+                            }
                         }
                     }
                 }
@@ -246,7 +263,6 @@ fun handleButtonClick(
         ":" -> inputTextView.value += txt
         else -> inputTextView.value += txt
     }
-    println(inputTextView.value)
 }
 
 private fun handleInput(
