@@ -17,6 +17,9 @@
     <string name="nine" translatable="false">9</string>
     <string name="input_hint">hh:mm or mm</string>
 
+    <string name="copy">Copy</string>
+    <string name="paste">Paste</string>
+
     <string name="info1">Enter up to three digits to provide only minutes. For example 90 is interpreted as 1 hour 30 minutes.</string>
     <string name="info2">Enter exactly four digits to provide hours and minutes. For example 0030 is interpreted as 30 minutes.</string>
     <string name="info3">The colon separates hour and minutes, so :30 is interpreted as 30 minutes, whereas 2: is interpreted as 2 hours.</string>

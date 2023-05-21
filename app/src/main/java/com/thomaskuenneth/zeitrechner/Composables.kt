@@ -1,5 +1,6 @@
 package com.thomaskuenneth.zeitrechner
 
+import android.app.Activity
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -11,21 +12,35 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType.Companion.LongPress
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowHeightSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
+import eu.thomaskuenneth.adaptivescaffold.AdaptiveScaffold
 import eu.thomaskuenneth.adaptivescaffold.LocalWindowSizeClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -49,6 +64,94 @@ data class UiState(
             scrollState.animateScrollTo(Int.MAX_VALUE)
         }
     }
+}
+
+@Composable
+fun Activity.TimeCalculatorScreen() {
+    val clipboardManager = LocalClipboardManager.current
+    val uiState = UiState(
+        input = rememberSaveable { mutableStateOf("") },
+        output = rememberSaveable { mutableStateOf("") },
+        result = rememberSaveable { mutableStateOf(0) },
+        lastOp = rememberSaveable { mutableStateOf("") },
+        scope = rememberCoroutineScope(),
+        scrollState = rememberScrollState()
+    )
+    val content: @Composable (PanelType) -> Unit = { panel ->
+        TimeCalculatorPanel(
+            panelType = panel,
+            uiState = uiState
+        )
+    }
+
+    AdaptiveScaffold(
+        topBar = {
+            TimeCalculatorAppBar(
+                input = uiState.input.value,
+                onCopyClicked = {
+                    clipboardManager.setText(AnnotatedString(text = it))
+                },
+                onPasteClicked = {
+                    uiState.input.value = clipboardManager.getText().toString().filter {
+                        it.isDigit() || it == ':'
+                    }
+                }
+            )
+        },
+        body = {
+            content(
+                if (shouldShowHelp())
+                    PanelType.BOTH
+                else
+                    PanelType.FIRST
+            )
+        },
+        secondaryBody = {
+            if (shouldShowHelp())
+                Help()
+            else
+                content(
+                    PanelType.SECOND
+                )
+        },
+        smallBody = {
+            content(
+                PanelType.BOTH
+            )
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimeCalculatorAppBar(
+    input: String,
+    onCopyClicked: (String) -> Unit,
+    onPasteClicked: () -> Unit
+) {
+    TopAppBar(
+        title = { Text(text = stringResource(id = R.string.app_name)) },
+        actions = {
+            if (input.isNotBlank()) {
+                IconButton(
+                    onClick = { onCopyClicked(input) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ContentCopy,
+                        contentDescription = stringResource(id = R.string.copy)
+                    )
+                }
+            }
+            IconButton(
+                onClick = onPasteClicked
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ContentPaste,
+                    contentDescription = stringResource(id = R.string.paste)
+                )
+            }
+        }
+    )
 }
 
 @Composable
