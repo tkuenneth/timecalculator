@@ -23,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -133,22 +134,32 @@ fun TimeCalculatorAppBar(
         title = { Text(text = stringResource(id = R.string.app_name)) },
         actions = {
             if (input.isNotBlank()) {
-                IconButton(
-                    onClick = { onCopyClicked(input) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ContentCopy,
-                        contentDescription = stringResource(id = R.string.copy)
-                    )
+                PlainTooltipBox(tooltip = {
+                    Text(text = stringResource(id = R.string.copy))
+                }) {
+                    IconButton(
+                        onClick = { onCopyClicked(input) },
+                        modifier = Modifier.tooltipAnchor()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = stringResource(id = R.string.copy)
+                        )
+                    }
                 }
             }
-            IconButton(
-                onClick = onPasteClicked
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ContentPaste,
-                    contentDescription = stringResource(id = R.string.paste)
-                )
+            PlainTooltipBox(tooltip = {
+                Text(text = stringResource(id = R.string.paste))
+            }) {
+                IconButton(
+                    onClick = onPasteClicked,
+                    modifier = Modifier.tooltipAnchor()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ContentPaste,
+                        contentDescription = stringResource(id = R.string.paste)
+                    )
+                }
             }
         }
     )
