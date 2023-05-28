@@ -1,0 +1,7 @@
+theme: minima
+title: Tommis Simple Time Calculator
+description: A simple tool to add or subtract times
+email: thomas@thomaskuenneth.eu
+author: Thomas Künneth
+header_pages:
+  - privacy.md
