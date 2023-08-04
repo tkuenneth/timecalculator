@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -39,10 +40,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowHeightSizeClass
-import androidx.window.core.layout.WindowWidthSizeClass
 import eu.thomaskuenneth.adaptivescaffold.AdaptiveScaffold
-import eu.thomaskuenneth.adaptivescaffold.LocalWindowSizeClass
+import eu.thomaskuenneth.adaptivescaffold.LocalFoldDef
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -171,54 +170,53 @@ fun TimeCalculatorPanel(
     uiState: UiState
 ) {
     with(uiState) {
+        val timesAndResult = @Composable {
+            TimesAndResults(
+                input = input.value,
+                output = output.value,
+                state = scrollState
+            )
+        }
+        val numKeyPad = @Composable {
+            NumKeypad(
+                callback = callback
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.surface),
+                .background(color = MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.BottomCenter
         ) {
             when (panelType) {
                 PanelType.FIRST -> {
-                    NumKeypad(
-                        callback = uiState.callback
-                    )
+                    numKeyPad()
                 }
 
                 PanelType.SECOND -> {
-                    TimesAndResults(
-                        input = input.value,
-                        output = output.value,
-                        state = scrollState
-                    )
+                    timesAndResult()
                 }
 
                 PanelType.BOTH -> {
-                    if (LocalWindowSizeClass.current.heightSizeClass != WindowHeightSizeClass.COMPACT) {
-                        Column {
-                            Box(modifier = Modifier.weight(1.0F)) {
-                                TimesAndResults(
-                                    input = input.value,
-                                    output = output.value,
-                                    state = scrollState
-                                )
+                    BoxWithConstraints {
+                        if (maxWidth / maxHeight < 1F) {
+                            Column {
+                                Box(modifier = Modifier.weight(1F)) {
+                                    timesAndResult()
+                                }
+                                numKeyPad()
                             }
-                            NumKeypad(
-                                callback = callback
-                            )
-                        }
-                    } else {
-                        Row {
-                            Box(modifier = Modifier.weight(0.5F)) {
-                                NumKeypad(
-                                    callback = callback
-                                )
-                            }
-                            Box(modifier = Modifier.weight(0.5F)) {
-                                TimesAndResults(
-                                    input = input.value,
-                                    output = output.value,
-                                    state = scrollState
-                                )
+                        } else {
+                            Row(verticalAlignment = Alignment.Bottom) {
+                                Box(
+                                    modifier = Modifier.weight(1F),
+                                    contentAlignment = Alignment.BottomStart
+                                ) {
+                                    numKeyPad()
+                                }
+                                Box(modifier = Modifier.weight(1F)) {
+                                    timesAndResult()
+                                }
                             }
                         }
                     }
@@ -359,10 +357,7 @@ fun Help() {
 }
 
 @Composable
-fun shouldShowHelp() = with(LocalWindowSizeClass.current) {
-    widthSizeClass != WindowWidthSizeClass.COMPACT
-            && heightSizeClass != WindowHeightSizeClass.COMPACT
-}
+fun shouldShowHelp() = LocalFoldDef.current.hasFold
 
 private fun handleButtonClick(
     txt: String,
