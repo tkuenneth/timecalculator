@@ -40,6 +40,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowHeightSizeClass
+import androidx.window.core.layout.WindowWidthSizeClass
+import androidx.window.layout.FoldingFeature
 import eu.thomaskuenneth.adaptivescaffold.AdaptiveScaffold
 import eu.thomaskuenneth.adaptivescaffold.LocalFoldDef
 import kotlinx.coroutines.CoroutineScope
@@ -188,13 +191,16 @@ fun TimeCalculatorPanel(
                 .background(color = MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.BottomCenter
         ) {
+            val swap = with(LocalFoldDef.current) {
+                orientation == FoldingFeature.Orientation.HORIZONTAL
+            }
             when (panelType) {
                 PanelType.FIRST -> {
-                    numKeyPad()
+                    if (swap) timesAndResult() else numKeyPad()
                 }
 
                 PanelType.SECOND -> {
-                    timesAndResult()
+                    if (swap) numKeyPad() else timesAndResult()
                 }
 
                 PanelType.BOTH -> {
@@ -357,7 +363,27 @@ fun Help() {
 }
 
 @Composable
-fun shouldShowHelp() = LocalFoldDef.current.hasFold
+fun shouldShowHelp() = with(LocalFoldDef.current) {
+    if (hasFold) {
+        when (orientation) {
+            FoldingFeature.Orientation.VERTICAL ->
+                windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED &&
+                        windowSizeClass.windowHeightSizeClass != WindowHeightSizeClass.COMPACT
+
+            FoldingFeature.Orientation.HORIZONTAL ->
+
+                windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT &&
+                        windowSizeClass.windowHeightSizeClass != WindowHeightSizeClass.COMPACT
+
+            else -> false
+        }
+    } else {
+        if (isPortrait)
+            windowSizeClass.windowHeightSizeClass == WindowHeightSizeClass.EXPANDED
+        else
+            windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
+    }
+}
 
 private fun handleButtonClick(
     txt: String,
