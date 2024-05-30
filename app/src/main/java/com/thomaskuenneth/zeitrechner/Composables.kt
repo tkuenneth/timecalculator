@@ -19,16 +19,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -75,7 +73,7 @@ fun Activity.TimeCalculatorScreen() {
     val uiState = UiState(
         input = rememberSaveable { mutableStateOf("") },
         output = rememberSaveable { mutableStateOf("") },
-        result = rememberSaveable { mutableStateOf(0) },
+        result = rememberSaveable { mutableIntStateOf(0) },
         lastOp = rememberSaveable { mutableStateOf("") },
         scope = rememberCoroutineScope(),
         scrollState = rememberScrollState()
@@ -136,33 +134,15 @@ fun TimeCalculatorAppBar(
         title = { Text(text = stringResource(id = R.string.app_name)) },
         actions = {
             if (input.isNotBlank()) {
-                PlainTooltipBox(tooltip = {
-                    Text(text = stringResource(id = R.string.copy))
-                }) {
-                    IconButton(
-                        onClick = { onCopyClicked(input) },
-                        modifier = Modifier.tooltipAnchor()
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ContentCopy,
-                            contentDescription = stringResource(id = R.string.copy)
-                        )
-                    }
-                }
+                IconButtonWithTooltip(
+                    imageVector = Icons.Default.ContentCopy,
+                    contentDescription = stringResource(id = R.string.copy)
+                ) { onCopyClicked(input) }
             }
-            PlainTooltipBox(tooltip = {
-                Text(text = stringResource(id = R.string.paste))
-            }) {
-                IconButton(
-                    onClick = onPasteClicked,
-                    modifier = Modifier.tooltipAnchor()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ContentPaste,
-                        contentDescription = stringResource(id = R.string.paste)
-                    )
-                }
-            }
+            IconButtonWithTooltip(
+                imageVector = Icons.Default.ContentPaste,
+                contentDescription = stringResource(id = R.string.paste)
+            ) { onPasteClicked() }
         }
     )
 }
@@ -204,7 +184,7 @@ fun TimeCalculatorPanel(
                 }
 
                 PanelType.BOTH -> {
-                    BoxWithConstraints {
+                    BoxWithConstraints() {
                         if (maxWidth / maxHeight < 1F) {
                             Column {
                                 Box(modifier = Modifier.weight(1F)) {
@@ -215,12 +195,12 @@ fun TimeCalculatorPanel(
                         } else {
                             Row(verticalAlignment = Alignment.Bottom) {
                                 Box(
-                                    modifier = Modifier.weight(1F),
+                                    modifier = Modifier.weight(0.7F),
                                     contentAlignment = Alignment.BottomStart
                                 ) {
                                     numKeyPad()
                                 }
-                                Box(modifier = Modifier.weight(1F)) {
+                                Box(modifier = Modifier.weight(0.3F)) {
                                     timesAndResult()
                                 }
                             }
@@ -238,9 +218,7 @@ fun TimesAndResults(
     output: String,
     state: ScrollState
 ) {
-    Column(
-        modifier = Modifier.padding(16.dp)
-    ) {
+    Column {
         TimeInput(input)
         Text(
             text = output,
@@ -256,13 +234,30 @@ fun TimesAndResults(
 }
 
 @Composable
+fun TimeInput(t: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = MaterialTheme.colorScheme.tertiaryContainer)
+            .padding(8.dp)
+    ) {
+        Text(
+            text = t.ifEmpty { stringResource(id = R.string.input_hint) },
+            color = MaterialTheme.colorScheme.onTertiaryContainer,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Composable
 fun NumKeypad(
     callback: (text: String) -> Any
 ) {
     Column(
         modifier = Modifier
-            .background(color = MaterialTheme.colorScheme.surface)
-            .padding(16.dp)
+            .fillMaxWidth()
+            .padding(all = 16.dp)
+            .background(color = MaterialTheme.colorScheme.background)
     ) {
         NumKeypadRow(
             listOf("7", "8", "9", "CE"),
@@ -288,34 +283,18 @@ fun NumKeypad(
 }
 
 @Composable
-fun TimeInput(t: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.tertiaryContainer)
-            .padding(8.dp)
-    ) {
-        Text(
-            text = t.ifEmpty { stringResource(id = R.string.input_hint) },
-            color = MaterialTheme.colorScheme.onTertiaryContainer,
-            style = MaterialTheme.typography.bodyLarge
-        )
-    }
-}
-
-@Composable
 fun NumKeypadRow(
     texts: List<String>,
     weights: List<Float>,
     callback: (text: String) -> Any
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    Row {
         for (i in texts.indices) {
             NumKeypadButton(
                 text = texts[i],
-                modifier = Modifier.weight(weights[i]),
+                modifier = Modifier
+                    .weight(weights[i])
+                    .padding(end = if (i < texts.size - 1) 8.dp else 0.dp),
                 callback = callback
             )
         }
@@ -330,8 +309,7 @@ fun NumKeypadButton(
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     Button(
-        modifier = modifier
-            .padding(4.dp),
+        modifier = modifier,
         onClick = {
             hapticFeedback.performHapticFeedback(hapticFeedbackType = LongPress)
             callback(text)
@@ -346,7 +324,7 @@ fun Help() {
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
-            .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val items = listOf(R.string.info1, R.string.info2, R.string.info3, R.string.info4)
         itemsIndexed(
@@ -357,7 +335,7 @@ fun Help() {
                 modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
             )
             if (index < items.lastIndex)
-                Divider(thickness = 1.dp)
+                HorizontalDivider(thickness = 1.dp)
         }
     }
 }
