@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -187,9 +188,11 @@ fun TimeCalculatorPanel(
                     BoxWithConstraints() {
                         if (maxWidth / maxHeight < 1F) {
                             Column {
-                                Box(modifier = Modifier
-                                    .weight(1F)
-                                    .padding(horizontal = 16.dp)) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1F)
+                                        .padding(horizontal = 16.dp)
+                                ) {
                                     timesAndResult()
                                 }
                                 numKeyPad()
@@ -258,7 +261,9 @@ fun NumKeypad(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(all = 16.dp)
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp)
+            .padding(top = 16.dp)
             .background(color = MaterialTheme.colorScheme.background)
     ) {
         NumKeypadRow(
