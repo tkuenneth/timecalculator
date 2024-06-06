@@ -185,7 +185,7 @@ fun TimeCalculatorPanel(
                 }
 
                 PanelType.BOTH -> {
-                    BoxWithConstraints() {
+                    BoxWithConstraints {
                         if (maxWidth / maxHeight < 1F) {
                             Column {
                                 Box(
