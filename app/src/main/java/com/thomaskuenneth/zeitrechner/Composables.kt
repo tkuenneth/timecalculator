@@ -187,7 +187,9 @@ fun TimeCalculatorPanel(
                     BoxWithConstraints() {
                         if (maxWidth / maxHeight < 1F) {
                             Column {
-                                Box(modifier = Modifier.weight(1F)) {
+                                Box(modifier = Modifier
+                                    .weight(1F)
+                                    .padding(horizontal = 16.dp)) {
                                     timesAndResult()
                                 }
                                 numKeyPad()
