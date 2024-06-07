@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -68,6 +71,7 @@ data class UiState(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Activity.TimeCalculatorScreen() {
     val clipboardManager = LocalClipboardManager.current
@@ -169,7 +173,8 @@ fun TimeCalculatorPanel(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.background),
+                .background(color = MaterialTheme.colorScheme.background)
+                .padding(paddingValues = WindowInsets.navigationBars.asPaddingValues()),
             contentAlignment = Alignment.BottomCenter
         ) {
             val swap = with(LocalFoldDef.current) {
