@@ -3,9 +3,12 @@ package com.thomaskuenneth.zeitrechner
 import android.app.Activity
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -26,6 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -42,6 +46,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import androidx.core.text.isDigitsOnly
 import androidx.window.core.layout.WindowHeightSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.window.layout.FoldingFeature
@@ -94,6 +99,8 @@ fun Activity.TimeCalculatorScreen() {
         topBar = {
             TimeCalculatorAppBar(
                 input = uiState.input.value,
+                onClipboard = clipboardManager.getText()?.text?.replace(Regex("[^0-9:]"), "")
+                    ?.take(32) ?: "",
                 onCopyClicked = {
                     clipboardManager.setText(AnnotatedString(text = it))
                 },
@@ -132,22 +139,25 @@ fun Activity.TimeCalculatorScreen() {
 @Composable
 fun TimeCalculatorAppBar(
     input: String,
+    onClipboard: String,
     onCopyClicked: (String) -> Unit,
     onPasteClicked: () -> Unit
 ) {
     TopAppBar(
         title = { Text(text = stringResource(id = R.string.app_name)) },
         actions = {
-            if (input.isNotBlank()) {
+            if (input.isNotBlank() && input != onClipboard) {
                 IconButtonWithTooltip(
                     imageVector = Icons.Default.ContentCopy,
-                    contentDescription = stringResource(id = R.string.copy)
+                    contentDescription = "${stringResource(id = R.string.copy)} $input"
                 ) { onCopyClicked(input) }
             }
-            IconButtonWithTooltip(
-                imageVector = Icons.Default.ContentPaste,
-                contentDescription = stringResource(id = R.string.paste)
-            ) { onPasteClicked() }
+            if (onClipboard.isNotEmpty()) {
+                IconButtonWithTooltip(
+                    imageVector = Icons.Default.ContentPaste,
+                    contentDescription = "${stringResource(id = R.string.paste)} $onClipboard"
+                ) { onPasteClicked() }
+            }
         }
     )
 }
@@ -162,7 +172,8 @@ fun TimeCalculatorPanel(
             TimesAndResults(
                 input = input.value,
                 output = output.value,
-                state = scrollState
+                state = scrollState,
+                chipClicked = { time -> input.value = time }
             )
         }
         val numKeyPad = @Composable {
@@ -222,24 +233,49 @@ fun TimeCalculatorPanel(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TimesAndResults(
     input: String,
     output: String,
-    state: ScrollState
+    state: ScrollState,
+    chipClicked: (String) -> Unit
 ) {
     Column {
         TimeInput(input)
-        Text(
-            text = output,
-            color = MaterialTheme.colorScheme.primary,
+        Box(
             modifier =
             Modifier
                 .fillMaxWidth()
                 .weight(1.0f)
-                .verticalScroll(state = state),
-            style = MaterialTheme.typography.bodyLarge
-        )
+        ) {
+            Text(
+                text = output,
+                color = MaterialTheme.colorScheme.primary,
+                modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(state = state),
+                style = MaterialTheme.typography.bodyLarge
+            )
+            if (input.length == 1 && input.isDigitsOnly()) {
+                val list = listOf(
+                    "${input}0",
+                    "${input}:00",
+                    "${input}:30"
+                )
+                FlowRow(
+                    modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    list.forEach { time ->
+                        SuggestionChip(
+                            onClick = { chipClicked(time) },
+                            label = { Text(text = time) })
+                    }
+                }
+            }
+        }
     }
 }
 
