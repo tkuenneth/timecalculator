@@ -136,3 +136,8 @@ google-services.json
 
 # End of https://www.gitignore.io/api/androidstudio
 .idea/kotlinc.xml
+.idea/caches/deviceStreaming.xml
+.idea/deploymentTargetDropDown.xml
+.idea/gradle.xml
+.idea/migrations.xml
+.idea/studiobot.xml

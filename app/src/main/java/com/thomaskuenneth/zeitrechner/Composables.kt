@@ -10,14 +10,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -176,16 +173,11 @@ fun TimeCalculatorPanel(
                 chipClicked = { time -> input.value = time }
             )
         }
-        val numKeyPad = @Composable {
-            NumKeypad(
-                callback = callback
-            )
-        }
+        val numKeyPad = @Composable { NumKeypad(callback = callback) }
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.background)
-                .padding(paddingValues = WindowInsets.navigationBars.asPaddingValues()),
+                .background(color = MaterialTheme.colorScheme.background),
             contentAlignment = Alignment.BottomCenter
         ) {
             val swap = with(LocalFoldDef.current) {
@@ -302,8 +294,7 @@ fun NumKeypad(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(horizontal = 16.dp)
+            .safeContentPadding()
             .padding(top = 16.dp)
             .background(color = MaterialTheme.colorScheme.background)
     ) {

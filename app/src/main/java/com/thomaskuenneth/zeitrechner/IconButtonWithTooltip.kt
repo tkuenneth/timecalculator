@@ -21,14 +21,10 @@ fun IconButtonWithTooltip(
     TooltipBox(
         positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
         tooltip = {
-            PlainTooltip {
-                Text(text = contentDescription)
-            }
+            PlainTooltip { Text(text = contentDescription) }
         }, state = rememberTooltipState()
     ) {
-        IconButton(
-            onClick = onClick
-        ) {
+        IconButton(onClick = onClick) {
             Icon(
                 imageVector = imageVector,
                 contentDescription = contentDescription
